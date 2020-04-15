@@ -10,7 +10,8 @@ import pandas as pd
 from torch.utils.data import DataLoader
 import getopt
 import sys
-
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 def main():
     # Construction of the vocabulary

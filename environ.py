@@ -16,8 +16,8 @@ from torch.utils.data import DataLoader, TensorDataset
 import model
 import os
 import util
-from sklearn.externals import joblib
-
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 def DNN(X, y, X_ind, y_ind, out, is_reg=False):
     """Cross Validation and independent set test for fully connected deep neural network
