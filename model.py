@@ -7,6 +7,7 @@ import torch
 from torch import nn
 from torch import optim
 from torch.nn import functional as F
+from tqdm import tqdm
 import time
 import util
 
@@ -41,11 +42,11 @@ class Base(nn.Module):
         # record the epoch when optimal model is saved.
         last_save = 0
         log = open(out + '.log', 'w')
-        for epoch in range(epochs):
+        for epoch in tqdm(range(epochs)):
             t0 = time.time()
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr * (1 - 1 / epochs) ** (epoch * 10)
-            for i, (Xb, yb) in enumerate(train_loader):
+            for i, (Xb, yb) in tqdm(enumerate(train_loader), total=len(train_loader), desc='Epoch %d' % epoch):
                 # Batch of target tenor and label tensor
                 Xb, yb = Xb.to(util.dev), yb.to(util.dev)
                 optimizer.zero_grad()
@@ -409,8 +410,8 @@ class Generator(nn.Module):
         optimizer = optim.Adam(self.parameters(), lr=lr)
         log = open(out + '.log', 'w')
         best_error = np.inf
-        for epoch in range(epochs):
-            for i, batch in enumerate(loader_train):
+        for epoch in tqdm(range(epochs)):
+            for i, batch in tqdm(enumerate(loader_train), total=len(loader_train), desc='Epoch %d' % epoch):
                 optimizer.zero_grad()
                 loss_train = self.likelihood(batch.to(util.dev))
                 loss_train = -loss_train.mean()
