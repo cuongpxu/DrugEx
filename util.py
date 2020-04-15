@@ -17,7 +17,7 @@ from rdkit.Chem.Scaffolds import MurckoScaffold
 torch.set_num_threads(1)
 rdBase.DisableLog('rdApp.error')
 # designate the device that the PyTorch is allowed to use.
-dev = torch.device('cuda')
+dev = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Voc(object):
