@@ -9,6 +9,8 @@ from util import Voc
 import numpy as np
 import re
 import os
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def corpus(input, out):
@@ -74,19 +76,23 @@ def ZINC(folder, out):
         out (str): the file path of output dataframe, it contains all of randomly selected molecules,
             also including its SMILES string, logP and molecular weight
     """
-    files = os.listdir(folder)
+
+    files = []
+    for r, d, f in os.walk(folder):
+        for file in f:
+            if '.txt' in file:
+                files.append(r + '/' + file)
     points = [(i, j) for i in range(200, 600, 25) for j in np.arange(-2, 6, 0.5)]
     select = pd.DataFrame()
-    for symbol in tqdm([i+j for i in 'ABCDEFGHIJK' for j in 'ABCDEFGHIJK']):
+    for f, fname in enumerate(files):
         zinc = pd.DataFrame()
-        for fname in files:
-            if not fname.endswith('.txt'): continue
-            if not fname.startswith(symbol): continue
-            df = pd.read_table(folder+fname)[['mwt', 'logp', 'smiles']]
-            df.columns = ['MWT', 'LOGP', 'CANONICAL_SMILES']
-            zinc = zinc.append(df)
+
+        df = pd.read_table(fname)[['mwt', 'logp', 'smiles']]
+        df.columns = ['MWT', 'LOGP', 'CANONICAL_SMILES']
+        zinc = zinc.append(df)
+
         for mwt, logp in points:
-            df = zinc[(zinc.MWT > mwt) & (zinc.MWT <= (mwt + 25))]
+            df = zinc[(zinc['MWT'] > mwt) & (zinc['MWT'] <= (mwt + 25))]
             df = df[(df.LOGP > logp) & (df.LOGP <= (logp+0.5))]
             if len(df) > 2500:
                 df = df.sample(2500)
@@ -125,6 +131,6 @@ def A2AR(input, out):
 
 
 if __name__ == '__main__':
-    # ZINC('zinc/', 'data/ZINC.txt')
-    corpus('data/ZINC.txt', 'data/zinc')
+    ZINC('zinc/', 'data/ZINC.txt')
+    corpus('data/zinc.txt', 'data/zinc')
     A2AR('data/A2AR_raw.txt', 'data/CHEMBL251.txt')
